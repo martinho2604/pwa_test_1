@@ -33,6 +33,9 @@
     input, select { width: 100%; color: var(--ink); background: #faf8f3; border: 1px solid var(--line); border-radius: 10px; outline: none; padding: 12px 13px; transition: border-color .2s, box-shadow .2s; }
     input:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(35, 107, 83, .12); }
     input[type='date'] { display: block; min-width: 0; max-width: 100%; -webkit-appearance: none; appearance: none; }
+    .date-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; min-width: 0; }
+    .today-button { color: var(--green); background: #e1eee6; border: 0; border-radius: 10px; padding: 0 14px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .today-button:hover { background: #cfe3d7; }
     .amount-wrap { position: relative; }
     .amount-wrap span { position: absolute; left: 13px; top: 12px; color: var(--muted); font-weight: 700; }
     .amount-wrap input { padding-left: 32px; font-size: 19px; font-weight: 700; }
@@ -94,7 +97,7 @@
           <div class="field"><label for="expense-amount">金額</label><div class="amount-wrap"><span>$</span><input id="expense-amount" type="number" min="0.01" step="0.01" placeholder="0.00" required /></div></div>
           <div class="field"><label for="expense-category">分類</label><select id="expense-category" required><option value="food">飲食</option><option value="transport">交通</option><option value="shopping">購物</option><option value="bills">住屋／帳單</option><option value="fun">娛樂</option><option value="other">其他</option></select></div>
           <div class="field"><label for="expense-note">備註</label><input id="expense-note" type="text" maxlength="60" placeholder="例如：午餐、月票⋯" /></div>
-          <div class="field"><label for="expense-date">日期</label><input id="expense-date" type="date" required /></div>
+          <div class="field"><label for="expense-date">日期</label><div class="date-actions"><input id="expense-date" type="date" required /><button id="today-button" class="today-button" type="button">今日</button></div></div>
           <button class="submit-button" type="submit">＋ 記低呢筆支出</button>
         </form>
       </section>

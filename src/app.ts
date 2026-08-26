@@ -14,16 +14,22 @@ const amountInput = document.getElementById('expense-amount') as HTMLInputElemen
 const categoryInput = document.getElementById('expense-category') as HTMLSelectElement;
 const noteInput = document.getElementById('expense-note') as HTMLInputElement;
 const dateInput = document.getElementById('expense-date') as HTMLInputElement;
+const todayButton = document.getElementById('today-button') as HTMLButtonElement;
 const list = document.getElementById('expense-list') as HTMLDivElement;
 const chart = document.getElementById('category-chart') as HTMLDivElement;
 
 let expenses = readExpenses();
 let period: 'month' | 'year' = 'month';
 let periodDate = new Date();
-dateInput.value = new Date().toISOString().slice(0, 10);
+dateInput.value = getToday();
 
 function readExpenses(): Expense[] {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') as Expense[]; } catch { return []; }
+}
+
+function getToday(): string {
+  const today = new Date();
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 }
 
 function money(value: number): string { return `$${value.toLocaleString('en-HK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; }
@@ -78,8 +84,14 @@ form.addEventListener('submit', event => {
   event.preventDefault();
   const amount = Number(amountInput.value);
   if (!amount || amount <= 0 || !dateInput.value) return;
+  const selectedDate = dateInput.value;
   expenses.push({ id: crypto.randomUUID(), amount: Math.round(amount * 100) / 100, category: categoryInput.value, note: noteInput.value.trim(), date: dateInput.value });
-  saveExpenses(); render(); form.reset(); dateInput.value = new Date().toISOString().slice(0, 10); amountInput.focus();
+  saveExpenses(); render(); form.reset(); dateInput.value = selectedDate; amountInput.focus();
+});
+
+todayButton.addEventListener('click', () => {
+  dateInput.value = getToday();
+  dateInput.focus();
 });
 
 list.addEventListener('click', event => {
