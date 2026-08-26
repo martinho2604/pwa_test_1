@@ -18,6 +18,8 @@ const list = document.getElementById('expense-list') as HTMLDivElement;
 const chart = document.getElementById('category-chart') as HTMLDivElement;
 
 let expenses = readExpenses();
+let period: 'month' | 'year' = 'month';
+let periodDate = new Date();
 dateInput.value = new Date().toISOString().slice(0, 10);
 
 function readExpenses(): Expense[] {
@@ -27,6 +29,12 @@ function readExpenses(): Expense[] {
 function money(value: number): string { return `$${value.toLocaleString('en-HK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; }
 function saveExpenses(): void { localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses)); }
 function sum(items: Expense[]): number { return items.reduce((total, expense) => total + expense.amount, 0); }
+
+function periodKey(date: Date): string {
+  return period === 'month' ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}` : String(date.getFullYear());
+}
+
+function expensePeriodKey(expense: Expense): string { return period === 'month' ? expense.date.slice(0, 7) : expense.date.slice(0, 4); }
 
 function render(): void {
   const today = new Date().toISOString().slice(0, 10);
@@ -42,15 +50,21 @@ function render(): void {
 }
 
 function renderChart(): void {
+  const selectedKey = periodKey(periodDate);
+  const periodExpenses = expenses.filter(expense => expensePeriodKey(expense) === selectedKey);
   const totals = new Map<string, number>();
-  expenses.forEach(expense => totals.set(expense.category, (totals.get(expense.category) ?? 0) + expense.amount));
-  const total = sum(expenses);
+  periodExpenses.forEach(expense => totals.set(expense.category, (totals.get(expense.category) ?? 0) + expense.amount));
+  const total = sum(periodExpenses);
   let current = 0;
   const stops = [...totals.entries()].map(([category, value]) => {
     const start = total ? current / total * 360 : 0; current += value;
     return `${categories[category].color} ${start}deg ${current / total * 360}deg`;
   });
   chart.style.background = stops.length ? `conic-gradient(${stops.join(', ')})` : '#e9e4d9';
+  document.getElementById('period-label')!.textContent = period === 'month'
+    ? `${periodDate.getFullYear()} 年 ${periodDate.getMonth() + 1} 月`
+    : `${periodDate.getFullYear()} 年`;
+  document.querySelectorAll<HTMLButtonElement>('[data-period]').forEach(button => button.classList.toggle('is-active', button.dataset.period === period));
   const legend = document.getElementById('category-legend')!;
   legend.innerHTML = stops.length ? [...totals.entries()].sort((a, b) => b[1] - a[1]).map(([category, value]) => `<div class="legend-row"><span class="legend-name"><i class="dot" style="background:${categories[category].color}"></i>${categories[category].label}</span><span class="legend-amount">${money(value)}</span></div>`).join('') : '<p class="empty-chart">暫時未有支出記錄。<br>由第一筆開始建立你的分布。</p>';
 }
@@ -77,5 +91,20 @@ list.addEventListener('click', event => {
 document.getElementById('clear-expenses')!.addEventListener('click', () => {
   if (expenses.length && window.confirm('確定要清除全部支出記錄嗎？')) { expenses = []; saveExpenses(); render(); }
 });
+
+document.querySelectorAll<HTMLButtonElement>('[data-period]').forEach(button => button.addEventListener('click', () => {
+  period = button.dataset.period as 'month' | 'year';
+  render();
+}));
+
+function movePeriod(offset: number): void {
+  periodDate = new Date(periodDate);
+  if (period === 'month') periodDate.setMonth(periodDate.getMonth() + offset);
+  else periodDate.setFullYear(periodDate.getFullYear() + offset);
+  render();
+}
+
+document.getElementById('previous-period')!.addEventListener('click', () => movePeriod(-1));
+document.getElementById('next-period')!.addEventListener('click', () => movePeriod(1));
 
 render();

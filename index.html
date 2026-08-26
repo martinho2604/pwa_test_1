@@ -51,6 +51,14 @@
     .chart-center { z-index: 1; text-align: center; }
     .chart-center strong { display: block; font-size: 21px; }
     .chart-center span { color: var(--muted); font-size: 11px; }
+    .chart-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .period-controls { display: flex; align-items: center; gap: 7px; margin-top: 14px; }
+    .period-toggle { display: flex; padding: 3px; background: #ede8dc; border-radius: 8px; }
+    .period-button, .period-arrow { color: var(--muted); background: transparent; border: 0; border-radius: 6px; font-size: 12px; font-weight: 700; padding: 6px 9px; }
+    .period-button.is-active { color: #fff; background: var(--green); }
+    .period-arrow { width: 27px; height: 27px; padding: 0; font-size: 18px; line-height: 1; }
+    .period-arrow:hover, .period-button:not(.is-active):hover { color: var(--green); background: #e1eee6; }
+    .period-label { min-width: 74px; color: var(--muted); font-size: 12px; text-align: center; }
     .legend { display: grid; gap: 12px; margin-top: 17px; }
     .legend-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; font-size: 13px; }
     .legend-name { display: flex; align-items: center; gap: 8px; }
@@ -92,7 +100,7 @@
       </section>
       <section class="overview">
         <div class="summary"><div class="summary-item"><span class="summary-label">本月支出</span><strong class="summary-value" id="month-total">$0.00</strong></div><div class="summary-item"><span class="summary-label">今日支出</span><strong class="summary-value" id="today-total">$0.00</strong></div><div class="summary-item"><span class="summary-label">記錄筆數</span><strong class="summary-value" id="expense-count">0 筆</strong></div></div>
-        <section class="panel chart-panel"><div id="category-chart" class="chart"><div class="chart-center"><strong id="chart-total">$0</strong><span>總支出</span></div></div><div><h2>支出分布</h2><div id="category-legend" class="legend"></div></div></section>
+        <section class="panel chart-panel"><div id="category-chart" class="chart"><div class="chart-center"><strong id="chart-total">$0</strong><span>總支出</span></div></div><div><div class="chart-heading"><h2>支出分布</h2><span id="period-label" class="period-label"></span></div><div class="period-controls"><button class="period-arrow" id="previous-period" type="button" aria-label="上一個期間">‹</button><div class="period-toggle"><button class="period-button is-active" data-period="month" type="button">月</button><button class="period-button" data-period="year" type="button">年</button></div><button class="period-arrow" id="next-period" type="button" aria-label="下一個期間">›</button></div><div id="category-legend" class="legend"></div></div></section>
         <section class="panel list-panel"><div class="panel-heading"><h2>最近記錄</h2><button id="clear-expenses" class="clear-button" type="button">清除全部</button></div><div id="expense-list" class="expense-list"></div></section>
       </section>
     </main>
