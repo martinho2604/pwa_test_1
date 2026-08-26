@@ -1,191 +1,101 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-Hant-HK">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Offline First Demo App</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Dexie.js (IndexedDB 封裝庫) -->
-  <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
-
-  <!-- iOS PWA 設定 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f6f3ed" />
+  <title>日日記帳</title>
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="DemoApp" />
+  <meta name="apple-mobile-web-app-title" content="日日記帳" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+
+    :root { --ink: #1f2a25; --muted: #718078; --paper: #fffdf9; --cream: #f6f3ed; --line: #e8e4db; --green: #236b53; --orange: #e27d47; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--cream); font-family: 'DM Sans', 'Noto Sans TC', sans-serif; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app-shell { max-width: 1180px; margin: 0 auto; padding: 38px 24px 64px; }
+    .topbar { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 32px; }
+    .eyebrow { color: var(--orange); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+    h1, h2, p { margin: 0; }
+    h1 { margin-top: 6px; font-family: 'Noto Sans TC', sans-serif; font-size: clamp(30px, 5vw, 48px); letter-spacing: -1px; line-height: 1.15; }
+    .subtitle { color: var(--muted); margin-top: 9px; font-size: 15px; }
+    .saved-state { color: var(--green); font-size: 13px; font-weight: 700; white-space: nowrap; }
+    .dashboard { display: grid; grid-template-columns: minmax(300px, .82fr) minmax(0, 1.45fr); gap: 22px; }
+    .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 12px 30px rgba(48, 57, 48, .055); }
+    .form-panel { padding: 25px; }
+    .panel-heading { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 21px; }
+    h2 { font-family: 'Noto Sans TC', sans-serif; font-size: 19px; font-weight: 900; }
+    .field { display: grid; gap: 7px; margin-bottom: 15px; }
+    label { color: var(--muted); font-size: 12px; font-weight: 700; }
+    input, select { width: 100%; color: var(--ink); background: #faf8f3; border: 1px solid var(--line); border-radius: 10px; outline: none; padding: 12px 13px; transition: border-color .2s, box-shadow .2s; }
+    input:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(35, 107, 83, .12); }
+    .amount-wrap { position: relative; }
+    .amount-wrap span { position: absolute; left: 13px; top: 12px; color: var(--muted); font-weight: 700; }
+    .amount-wrap input { padding-left: 32px; font-size: 19px; font-weight: 700; }
+    .submit-button { width: 100%; color: #fff; background: var(--green); border: 0; border-radius: 10px; margin-top: 4px; padding: 13px; font-weight: 700; transition: transform .2s, background .2s; }
+    .submit-button:hover { background: #174f3d; transform: translateY(-1px); }
+    .overview { display: grid; gap: 22px; }
+    .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .summary-item { padding: 18px; background: #ede8dc; border-radius: 14px; }
+    .summary-item:nth-child(2) { background: #e1eee6; }
+    .summary-item:nth-child(3) { background: #f6e3d4; }
+    .summary-label { color: var(--muted); font-size: 12px; font-weight: 700; }
+    .summary-value { display: block; margin-top: 6px; font-size: 24px; font-weight: 700; }
+    .chart-panel { display: grid; grid-template-columns: 190px 1fr; align-items: center; gap: 30px; padding: 25px; }
+    .chart { width: 174px; height: 174px; position: relative; display: grid; place-items: center; border-radius: 50%; background: #e9e4d9; }
+    .chart::after { content: ''; position: absolute; width: 94px; height: 94px; background: var(--paper); border-radius: 50%; }
+    .chart-center { z-index: 1; text-align: center; }
+    .chart-center strong { display: block; font-size: 21px; }
+    .chart-center span { color: var(--muted); font-size: 11px; }
+    .legend { display: grid; gap: 12px; margin-top: 17px; }
+    .legend-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; font-size: 13px; }
+    .legend-name { display: flex; align-items: center; gap: 8px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; }
+    .legend-amount { color: var(--muted); font-weight: 700; }
+    .empty-chart { color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .list-panel { padding: 25px; }
+    .clear-button { color: var(--muted); background: transparent; border: 0; font-size: 12px; }
+    .clear-button:hover { color: #c2553c; }
+    .expense-list { display: grid; gap: 8px; }
+    .expense-row { display: grid; grid-template-columns: 10px 1fr auto auto; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+    .expense-row:last-child { border-bottom: 0; }
+    .expense-category { color: var(--muted); font-size: 12px; }
+    .expense-note { font-size: 14px; font-weight: 700; }
+    .expense-date { color: var(--muted); font-size: 12px; }
+    .expense-amount { font-size: 14px; font-weight: 700; }
+    .delete-button { color: #a4ada7; background: none; border: 0; font-size: 18px; line-height: 1; padding: 4px; }
+    .delete-button:hover { color: #c2553c; }
+    .empty-list { color: var(--muted); padding: 20px 0 5px; text-align: center; font-size: 13px; }
+    @media (max-width: 760px) { .app-shell { padding: 26px 16px 44px; } .topbar { align-items: flex-start; margin-bottom: 24px; } .saved-state { padding-top: 6px; } .dashboard { grid-template-columns: 1fr; } .chart-panel { grid-template-columns: 145px 1fr; gap: 20px; padding: 20px; } .chart { width: 140px; height: 140px; } .chart::after { width: 76px; height: 76px; } .summary-item { padding: 14px 12px; } .summary-value { font-size: 18px; } .expense-row { grid-template-columns: 9px 1fr auto; } .expense-date { grid-column: 2; grid-row: 2; } .expense-amount { grid-column: 3; grid-row: 1 / span 2; } .delete-button { display: none; } }
+  </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col items-center p-4">
-
-  <!-- App Header -->
-  <header class="w-full max-w-md bg-white rounded-2xl shadow-sm p-4 mb-4 flex justify-between items-center border border-slate-200">
-    <h1 class="text-xl font-bold text-slate-900">離線記事本 Demo</h1>
-    <!-- 網路連線狀態標籤 -->
-    <span id="status-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 transition-all">
-      連線中
-    </span>
-  </header>
-
-  <!-- 主要內容區 -->
-  <main class="w-full max-w-md space-y-4">
-    <!-- 輸入表單 -->
-    <form id="note-form" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-      <div>
-        <input 
-          type="text" 
-          id="note-input" 
-          placeholder="輸入內容（離線亦可新增）..." 
-          class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
-      <button 
-        type="submit" 
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-xl shadow transition-colors"
-      >
-        新增事項
-      </button>
-    </form>
-
-    <!-- 記事清單 -->
-    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-      <div class="flex justify-between items-center mb-3">
-        <h2 class="font-bold text-slate-700">記錄列表</h2>
-        <span id="sync-info" class="text-xs text-slate-400">已同步至本地</span>
-      </div>
-      <ul id="note-list" class="space-y-2">
-        <!-- 列表由 JS 動態生成 -->
-      </ul>
-    </div>
-  </main>
-
-  <script>
-    // -------------------------------------------------------------
-    // 1. 初始化 IndexedDB (Dexie.js)
-    // -------------------------------------------------------------
-    const db = new Dexie('DemoOfflineApp');
-    db.version(1).stores({
-      notes: '++id, content, synced, createdAt'
-    });
-
-    // DOM 元素引用
-    const form = document.getElementById('note-form');
-    const input = document.getElementById('note-input');
-    const list = document.getElementById('note-list');
-    const statusBadge = document.getElementById('status-badge');
-
-    // -------------------------------------------------------------
-    // 2. 渲染清單
-    // -------------------------------------------------------------
-    async function renderNotes() {
-      const notes = await db.notes.orderBy('id').reverse().toArray();
-      list.innerHTML = '';
-
-      if (notes.length === 0) {
-        list.innerHTML = `<li class="text-slate-400 text-center py-4 text-sm">目前沒有任何記錄</li>`;
-        return;
-      }
-
-      notes.forEach(note => {
-        const li = document.createElement('li');
-        li.className = 'flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100';
-        
-        const syncBadge = note.synced 
-          ? `<span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">已同步雲端</span>`
-          : `<span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">待同步 (離線)</span>`;
-
-        li.innerHTML = `
-          <div class="flex flex-col">
-            <span class="font-medium text-slate-800">${escapeHtml(note.content)}</span>
-            <span class="text-[10px] text-slate-400">${new Date(note.createdAt).toLocaleTimeString()}</span>
-          </div>
-          <div class="flex items-center gap-2">
-            ${syncBadge}
-            <button onclick="deleteNote(${note.id})" class="text-slate-400 hover:text-red-500 text-sm px-1">✕</button>
-          </div>
-        `;
-        list.appendChild(li);
-      });
-    }
-
-    // -------------------------------------------------------------
-    // 3. 新增與刪除資料（先寫入本地）
-    // -------------------------------------------------------------
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const content = input.value.trim();
-      if (!content) return;
-
-      const isOnline = navigator.onLine;
-
-      // 寫入本地資料庫
-      await db.notes.add({
-        content,
-        synced: isOnline ? 1 : 0, // 若在線直接標記已同步，離線則標記 0
-        createdAt: new Date().toISOString()
-      });
-
-      input.value = '';
-      await renderNotes();
-
-      // 若連線中，模擬觸發雲端同步 API
-      if (isOnline) {
-        mockCloudSync();
-      }
-    });
-
-    async function deleteNote(id) {
-      await db.notes.delete(id);
-      await renderNotes();
-    }
-
-    // XSS 防護
-    function escapeHtml(text) {
-      return text.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
-    }
-
-    // -------------------------------------------------------------
-    // 4. 網路狀態偵測與模擬同步邏輯
-    // -------------------------------------------------------------
-    function updateOnlineStatus() {
-      if (navigator.onLine) {
-        statusBadge.textContent = '連線中';
-        statusBadge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800';
-        syncUnsyncedNotes(); // 連線時自動觸發同步
-      } else {
-        statusBadge.textContent = '離線模式';
-        statusBadge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800';
-      }
-    }
-
-    // 模擬將離線期間新增的資料上傳至伺服器
-    async function syncUnsyncedNotes() {
-      const unsynced = await db.notes.where('synced').equals(0).toArray();
-      if (unsynced.length === 0) return;
-
-      console.log(`偵測到 ${unsynced.length} 筆待同步資料，開始背景同步...`);
-
-      // 模擬 API 延遲
-      setTimeout(async () => {
-        for (let item of unsynced) {
-          await db.notes.update(item.id, { synced: 1 });
-        }
-        console.log('同步完成！');
-        await renderNotes();
-      }, 1000);
-    }
-
-    function mockCloudSync() {
-      console.log('資料已實時傳送至雲端伺服器');
-    }
-
-    // 監聽連線狀態改變
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
-
-    // 頁面初始化
-    updateOnlineStatus();
-    renderNotes();
-  </script>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div><div class="eyebrow">Personal finance · 2026</div><h1>日日記帳</h1><p class="subtitle">把每一筆日常，記成更清楚的選擇。</p></div>
+      <span class="saved-state">● 已儲存到本機</span>
+    </header>
+    <main class="dashboard">
+      <section class="panel form-panel">
+        <div class="panel-heading"><h2>新增支出</h2><span class="eyebrow">Add expense</span></div>
+        <form id="expense-form">
+          <div class="field"><label for="expense-amount">金額</label><div class="amount-wrap"><span>$</span><input id="expense-amount" type="number" min="0.01" step="0.01" placeholder="0.00" required /></div></div>
+          <div class="field"><label for="expense-category">分類</label><select id="expense-category" required><option value="food">飲食</option><option value="transport">交通</option><option value="shopping">購物</option><option value="bills">住屋／帳單</option><option value="fun">娛樂</option><option value="other">其他</option></select></div>
+          <div class="field"><label for="expense-note">備註</label><input id="expense-note" type="text" maxlength="60" placeholder="例如：午餐、月票⋯" /></div>
+          <div class="field"><label for="expense-date">日期</label><input id="expense-date" type="date" required /></div>
+          <button class="submit-button" type="submit">＋ 記低呢筆支出</button>
+        </form>
+      </section>
+      <section class="overview">
+        <div class="summary"><div class="summary-item"><span class="summary-label">本月支出</span><strong class="summary-value" id="month-total">$0.00</strong></div><div class="summary-item"><span class="summary-label">今日支出</span><strong class="summary-value" id="today-total">$0.00</strong></div><div class="summary-item"><span class="summary-label">記錄筆數</span><strong class="summary-value" id="expense-count">0 筆</strong></div></div>
+        <section class="panel chart-panel"><div id="category-chart" class="chart"><div class="chart-center"><strong id="chart-total">$0</strong><span>總支出</span></div></div><div><h2>支出分布</h2><div id="category-legend" class="legend"></div></div></section>
+        <section class="panel list-panel"><div class="panel-heading"><h2>最近記錄</h2><button id="clear-expenses" class="clear-button" type="button">清除全部</button></div><div id="expense-list" class="expense-list"></div></section>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="./dist/app.js"></script>
 </body>
 </html>

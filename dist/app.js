@@ -1,0 +1,86 @@
+import { escapeHtml } from './note-utils.js';
+const STORAGE_KEY = 'pwa-expenses';
+const categories = {
+    food: { label: '飲食', color: '#e27d47' }, transport: { label: '交通', color: '#4f8f8a' },
+    shopping: { label: '購物', color: '#d6aa45' }, bills: { label: '住屋／帳單', color: '#7d7396' },
+    fun: { label: '娛樂', color: '#d46c7b' }, other: { label: '其他', color: '#8c9a91' }
+};
+const form = document.getElementById('expense-form');
+const amountInput = document.getElementById('expense-amount');
+const categoryInput = document.getElementById('expense-category');
+const noteInput = document.getElementById('expense-note');
+const dateInput = document.getElementById('expense-date');
+const list = document.getElementById('expense-list');
+const chart = document.getElementById('category-chart');
+let expenses = readExpenses();
+dateInput.value = new Date().toISOString().slice(0, 10);
+function readExpenses() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
+    }
+    catch {
+        return [];
+    }
+}
+function money(value) { return `$${value.toLocaleString('en-HK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; }
+function saveExpenses() { localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses)); }
+function sum(items) { return items.reduce((total, expense) => total + expense.amount, 0); }
+function render() {
+    const today = new Date().toISOString().slice(0, 10);
+    const month = today.slice(0, 7);
+    const monthExpenses = expenses.filter(expense => expense.date.startsWith(month));
+    const todayExpenses = expenses.filter(expense => expense.date === today);
+    document.getElementById('month-total').textContent = money(sum(monthExpenses));
+    document.getElementById('today-total').textContent = money(sum(todayExpenses));
+    document.getElementById('expense-count').textContent = `${expenses.length} 筆`;
+    document.getElementById('chart-total').textContent = money(sum(expenses)).replace('.00', '');
+    renderChart();
+    renderList();
+}
+function renderChart() {
+    const totals = new Map();
+    expenses.forEach(expense => totals.set(expense.category, (totals.get(expense.category) ?? 0) + expense.amount));
+    const total = sum(expenses);
+    let current = 0;
+    const stops = [...totals.entries()].map(([category, value]) => {
+        const start = total ? current / total * 360 : 0;
+        current += value;
+        return `${categories[category].color} ${start}deg ${current / total * 360}deg`;
+    });
+    chart.style.background = stops.length ? `conic-gradient(${stops.join(', ')})` : '#e9e4d9';
+    const legend = document.getElementById('category-legend');
+    legend.innerHTML = stops.length ? [...totals.entries()].sort((a, b) => b[1] - a[1]).map(([category, value]) => `<div class="legend-row"><span class="legend-name"><i class="dot" style="background:${categories[category].color}"></i>${categories[category].label}</span><span class="legend-amount">${money(value)}</span></div>`).join('') : '<p class="empty-chart">暫時未有支出記錄。<br>由第一筆開始建立你的分布。</p>';
+}
+function renderList() {
+    const sorted = [...expenses].sort((a, b) => `${b.date}${b.id}`.localeCompare(`${a.date}${a.id}`));
+    list.innerHTML = sorted.length ? sorted.map(expense => `<div class="expense-row"><i class="dot" style="background:${categories[expense.category].color}"></i><div><div class="expense-note">${escapeHtml(expense.note || categories[expense.category].label)}</div><div class="expense-category">${categories[expense.category].label}</div></div><span class="expense-date">${expense.date}</span><strong class="expense-amount">-${money(expense.amount)}</strong><button type="button" class="delete-button" data-expense-id="${expense.id}" aria-label="刪除記錄">×</button></div>`).join('') : '<div class="empty-list">今日未有記錄，先記低一筆支出吧。</div>';
+}
+form.addEventListener('submit', event => {
+    event.preventDefault();
+    const amount = Number(amountInput.value);
+    if (!amount || amount <= 0 || !dateInput.value)
+        return;
+    expenses.push({ id: crypto.randomUUID(), amount: Math.round(amount * 100) / 100, category: categoryInput.value, note: noteInput.value.trim(), date: dateInput.value });
+    saveExpenses();
+    render();
+    form.reset();
+    dateInput.value = new Date().toISOString().slice(0, 10);
+    amountInput.focus();
+});
+list.addEventListener('click', event => {
+    const target = event.target;
+    const id = target.closest('[data-expense-id]')?.dataset.expenseId;
+    if (id) {
+        expenses = expenses.filter(expense => expense.id !== id);
+        saveExpenses();
+        render();
+    }
+});
+document.getElementById('clear-expenses').addEventListener('click', () => {
+    if (expenses.length && window.confirm('確定要清除全部支出記錄嗎？')) {
+        expenses = [];
+        saveExpenses();
+        render();
+    }
+});
+render();
