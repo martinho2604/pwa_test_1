@@ -25,13 +25,14 @@
     .saved-state { color: var(--green); font-size: 13px; font-weight: 700; white-space: nowrap; }
     .dashboard { display: grid; grid-template-columns: minmax(300px, .82fr) minmax(0, 1.45fr); gap: 22px; }
     .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 12px 30px rgba(48, 57, 48, .055); }
-    .form-panel { padding: 25px; }
+    .form-panel { min-width: 0; padding: 25px; }
     .panel-heading { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 21px; }
     h2 { font-family: 'Noto Sans TC', sans-serif; font-size: 19px; font-weight: 900; }
-    .field { display: grid; gap: 7px; margin-bottom: 15px; }
+    .field { display: grid; min-width: 0; gap: 7px; margin-bottom: 15px; }
     label { color: var(--muted); font-size: 12px; font-weight: 700; }
     input, select { width: 100%; color: var(--ink); background: #faf8f3; border: 1px solid var(--line); border-radius: 10px; outline: none; padding: 12px 13px; transition: border-color .2s, box-shadow .2s; }
     input:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(35, 107, 83, .12); }
+    input[type='date'] { display: block; min-width: 0; max-width: 100%; -webkit-appearance: none; appearance: none; }
     .amount-wrap { position: relative; }
     .amount-wrap span { position: absolute; left: 13px; top: 12px; color: var(--muted); font-weight: 700; }
     .amount-wrap input { padding-left: 32px; font-size: 19px; font-weight: 700; }
