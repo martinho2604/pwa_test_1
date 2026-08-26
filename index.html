@@ -30,7 +30,7 @@
     h2 { font-family: 'Noto Sans TC', sans-serif; font-size: 19px; font-weight: 900; }
     .field { display: grid; min-width: 0; gap: 7px; margin-bottom: 15px; }
     label { color: var(--muted); font-size: 12px; font-weight: 700; }
-    input, select { width: 100%; color: var(--ink); background: #faf8f3; border: 1px solid var(--line); border-radius: 10px; outline: none; padding: 12px 13px; transition: border-color .2s, box-shadow .2s; }
+    input, select { width: 100%; color: var(--ink); background: #faf8f3; border: 1px solid var(--line); border-radius: 10px; outline: none; padding: 12px 13px; transition: border-color .2s, box-sh[...]
     input:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(35, 107, 83, .12); }
     input[type='date'] { display: block; min-width: 0; max-width: 100%; -webkit-appearance: none; appearance: none; }
     .date-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; min-width: 0; }
@@ -39,7 +39,7 @@
     .amount-wrap { position: relative; }
     .amount-wrap span { position: absolute; left: 13px; top: 12px; color: var(--muted); font-weight: 700; }
     .amount-wrap input { padding-left: 32px; font-size: 19px; font-weight: 700; }
-    .submit-button { width: 100%; color: #fff; background: var(--green); border: 0; border-radius: 10px; margin-top: 4px; padding: 13px; font-weight: 700; transition: transform .2s, background .2s; }
+    .submit-button { width: 100%; color: #fff; background: var(--green); border: 0; border-radius: 10px; margin-top: 4px; padding: 13px; font-weight: 700; transition: transform .2s, background .2s[...]
     .submit-button:hover { background: #174f3d; transform: translateY(-1px); }
     .overview { display: grid; gap: 22px; }
     .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -81,30 +81,31 @@
     .delete-button { color: #a4ada7; background: none; border: 0; font-size: 18px; line-height: 1; padding: 4px; }
     .delete-button:hover { color: #c2553c; }
     .empty-list { color: var(--muted); padding: 20px 0 5px; text-align: center; font-size: 13px; }
-    @media (max-width: 760px) { .app-shell { padding: 26px 16px 44px; } .topbar { align-items: flex-start; margin-bottom: 24px; } .saved-state { padding-top: 6px; } .dashboard { grid-template-columns: 1fr; } .chart-panel { grid-template-columns: 145px 1fr; gap: 20px; padding: 20px; } .chart { width: 140px; height: 140px; } .chart::after { width: 76px; height: 76px; } .summary-item { padding: 14px 12px; } .summary-value { font-size: 18px; } .expense-row { grid-template-columns: 9px 1fr auto; } .expense-date { grid-column: 2; grid-row: 2; } .expense-amount { grid-column: 3; grid-row: 1 / span 2; } .delete-button { display: none; } }
+    @media (max-width: 760px) { .app-shell { padding: 26px 16px 44px; } .topbar { align-items: flex-start; margin-bottom: 24px; } .saved-state { padding-top: 6px; } .dashboard { grid-template-colu[...]
+    }
   </style>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <div><div class="eyebrow">Personal finance · 2026</div><h1>日日記帳</h1><p class="subtitle">把每一筆日常，記成更清楚的選擇。</p></div>
+      <div><div class="eyebrow">Personal finance · 2026</div><h1>日日記帳</h1><p class="subtitle">把每一筆支出，記成更清楚的選擇。</p></div>
       <span class="saved-state">● 已儲存到本機</span>
     </header>
     <main class="dashboard">
       <section class="panel form-panel">
         <div class="panel-heading"><h2>新增支出</h2><span class="eyebrow">Add expense</span></div>
         <form id="expense-form">
-          <div class="field"><label for="expense-amount">金額</label><div class="amount-wrap"><span>$</span><input id="expense-amount" type="number" min="0.01" step="0.01" placeholder="0.00" required /></div></div>
-          <div class="field"><label for="expense-category">分類</label><select id="expense-category" required><option value="food">飲食</option><option value="transport">交通</option><option value="shopping">購物</option><option value="bills">住屋／帳單</option><option value="fun">娛樂</option><option value="other">其他</option></select></div>
+          <div class="field"><label for="expense-amount">金額</label><div class="amount-wrap"><span>$</span><input id="expense-amount" type="number" min="0.01" step="0.01" placeholder="0.00" req[...]
+          <div class="field"><label for="expense-category">分類</label><select id="expense-category" required><option value="food">飲食</option><option value="transport">交通</option><option[...]
           <div class="field"><label for="expense-note">備註</label><input id="expense-note" type="text" maxlength="60" placeholder="例如：午餐、月票⋯" /></div>
-          <div class="field"><label for="expense-date">日期</label><div class="date-actions"><input id="expense-date" type="date" required /><button id="today-button" class="today-button" type="button">今日</button></div></div>
+          <div class="field"><label for="expense-date">日期</label><div class="date-actions"><input id="expense-date" type="date" required /><button id="today-button" class="today-button" type=[...]
           <button class="submit-button" type="submit">＋ 記低呢筆支出</button>
         </form>
       </section>
       <section class="overview">
-        <div class="summary"><div class="summary-item"><span class="summary-label">本月支出</span><strong class="summary-value" id="month-total">$0.00</strong></div><div class="summary-item"><span class="summary-label">今日支出</span><strong class="summary-value" id="today-total">$0.00</strong></div><div class="summary-item"><span class="summary-label">記錄筆數</span><strong class="summary-value" id="expense-count">0 筆</strong></div></div>
-        <section class="panel chart-panel"><div id="category-chart" class="chart"><div class="chart-center"><strong id="chart-total">$0</strong><span>總支出</span></div></div><div><div class="chart-heading"><h2>支出分布</h2><span id="period-label" class="period-label"></span></div><div class="period-controls"><button class="period-arrow" id="previous-period" type="button" aria-label="上一個期間">‹</button><div class="period-toggle"><button class="period-button is-active" data-period="month" type="button">月</button><button class="period-button" data-period="year" type="button">年</button></div><button class="period-arrow" id="next-period" type="button" aria-label="下一個期間">›</button></div><div id="category-legend" class="legend"></div></div></section>
-        <section class="panel list-panel"><div class="panel-heading"><h2>最近記錄</h2><button id="clear-expenses" class="clear-button" type="button">清除全部</button></div><div id="expense-list" class="expense-list"></div></section>
+        <div class="summary"><div class="summary-item"><span class="summary-label">本月支出</span><strong class="summary-value" id="month-total">$0.00</strong></div><div class="summary-item">[...]
+        <section class="panel chart-panel"><div id="category-chart" class="chart"><div class="chart-center"><strong id="chart-total">$0</strong><span>總支出</span></div></div><div><div class="[...]
+        <section class="panel list-panel"><div class="panel-heading"><h2>最近記錄</h2><button id="clear-expenses" class="clear-button" type="button">清除全部</button></div><div id="expens[...]
       </section>
     </main>
   </div>
